@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Day Off Request Calendar</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            background-color: #b0b0b0;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .day, .header {
+            border: 1px solid #ccc;
+            padding: 20px;
+            text-align: center;
+            background-color: #fff;
+            border-radius: 5px;
+            width: 1.5in;
+            height: 1.5in;
+            box-sizing: border-box;
+        }
+        .header {
+            font-weight: bold;
+            background-color: #e0e0e0;
+        }
+        .day.off {
+            background-color: #f8d7da;
+        }
+        .form-container {
+            margin: 20px 0;
+        }
+        h1, h2 {
+            text-align: center;
+        }
+        .month-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .month-navigation button {
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 id="monthYear">Day Off Request Calendar</h1>
+        <div class="month-navigation">
+            <button id="prevMonth">Previous Month</button>
+            <button id="nextMonth">Next Month</button>
+        </div>
+        <div class="calendar" id="calendar"></div>
+        <div class="form-container">
+            <h2>Request a Day Off</h2>
+            <form id="dayOffForm">
+                <label for="name">Name:</label>
+                <select id="name" required>
+                    <option value="Yvette">Yvette</option>
+                    <option value="Colin">Colin</option>
+                    <option value="Steven">Steven</option>
+                </select>
+                <label for="date">Date:</label>
+                <input type="date" id="date" required>
+                <button type="submit">Submit</button>
+            </form>
+            <h2>Remove a Day Off</h2>
+            <form id="removeDayOffForm">
+                <label for="removeDate">Date:</label>
+                <input type="date" id="removeDate" required>
+                <button type="submit">Remove</button>
+            </form>
+        </div>
+    </div>
+    <script>
+        const calendar = document.getElementById('calendar');
+        const dayOffForm = document.getElementById('dayOffForm');
+        const removeDayOffForm = document.getElementById('removeDayOffForm');
+        const monthYear = document.getElementById('monthYear');
+        const prevMonthButton = document.getElementById('prevMonth');
+        const nextMonthButton = document.getElementById('nextMonth');
+
+        let currentMonth = new Date().getMonth();
+        let currentYear = new Date().getFullYear();
+
+        // Days of the week
+        const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+        // Generate calendar headers
+        function generateCalendarHeaders() {
+            daysOfWeek.forEach(day => {
+                const headerDiv = document.createElement('div');
+                headerDiv.classList.add('header');
+                headerDiv.textContent = day;
+                calendar.appendChild(headerDiv);
+            });
+        }
+
+        // Generate calendar days
+        function generateCalendarDays(month, year) {
+            calendar.innerHTML = '';
+            generateCalendarHeaders();
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            for (let i = 0; i < firstDay; i++) {
+                const emptyDiv = document.createElement('div');
+                emptyDiv.classList.add('day');
+                calendar.appendChild(emptyDiv);
+            }
+
+            for (let i = 1; i <= daysInMonth; i++) {
+                const dayDiv = document.createElement('div');
+                dayDiv.classList.add('day');
+                dayDiv.textContent = i;
+                dayDiv.id = `day-${year}-${month + 1}-${i}`;
+                calendar.appendChild(dayDiv);
+            }
+
+            loadDaysOff();
+        }
+
+        // Load saved days off from local storage
+        function loadDaysOff() {
+            const daysOff = JSON.parse(localStorage.getItem('daysOff')) || [];
+            daysOff.forEach(dayOff => {
+                const dayDiv = document.getElementById(`day-${dayOff.year}-${dayOff.month}-${dayOff.day}`);
+                if (dayDiv) {
+                    dayDiv.classList.add('off');
+                    dayDiv.textContent += ` - ${dayOff.name}`;
+                }
+            });
+        }
+
+        // Save day off to local storage
+        function saveDayOff(day, month, year, name) {
+            const daysOff = JSON.parse(localStorage.getItem('daysOff')) || [];
+            daysOff.push({ day, month, year, name });
+            localStorage.setItem('daysOff', JSON.stringify(daysOff));
+        }
+
+        // Remove day off from local storage
+        function removeDayOff(day, month, year) {
+            let daysOff = JSON.parse(localStorage.getItem('daysOff')) || [];
+            daysOff = daysOff.filter(dayOff => !(dayOff.day === day && dayOff.month === month && dayOff.year === year));
+            localStorage.setItem('daysOff', JSON.stringify(daysOff));
+        }
+
+        // Handle day off form submission
+        dayOffForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const name = document.getElementById('name').value;
+            const date = new Date(document.getElementById('date').value);
+            const day = date.getUTCDate(); // Use getUTCDate to ensure correct date
+            const month = date.getUTCMonth() + 1; // Adjust month to be 1-based
+            const year = date.getUTCFullYear();
+            const dayDiv = document.getElementById(`day-${year}-${month}-${day}`);
+            if (dayDiv) {
+                dayDiv.classList.add('off');
+                dayDiv.textContent += ` - ${name}`;
+                saveDayOff(day, month, year, name);
+            }
+        });
+
+        // Handle remove day off form submission
+        removeDayOffForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const date = new Date(document.getElementById('removeDate').value);
+            const day = date.getUTCDate(); // Use getUTCDate to ensure correct date
+            const month = date.getUTCMonth() + 1; // Adjust month to be 1-based
+            const year = date.getUTCFullYear();
+            const dayDiv = document.getElementById(`day-${year}-${month}-${day}`);
+            if (dayDiv) {
+                dayDiv.classList.remove('off');
+                dayDiv.textContent = day;
+                removeDayOff(day, month, year);
+            }
+        });
+
+        // Update month and year display
+        function updateMonthYear() {
+            const monthNames = [
+                'January', 'February', 'March', 'April', 'May', 'June',
+                'July', 'August', 'September', 'October', 'November', 'December'
+            ];
+            monthYear.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+        }
+
+        // Handle previous month button click
+        prevMonthButton.addEventListener('click', function() {
+            if (currentMonth === 0) {
+                currentMonth = 11;
+                currentYear--;
+            } else {
+                currentMonth--;
+            }
+            updateMonthYear();
+            generateCalendarDays(currentMonth, currentYear);
+        });
+
+        // Handle next month button click
+        nextMonthButton.addEventListener('click', function() {
+            if (currentMonth === 11) {
+                currentMonth = 0;
+                currentYear++;
+            } else {
+                currentMonth++;
+            }
+            updateMonthYear();
+            generateCalendarDays(currentMonth, currentYear);
+        });
+
+        // Initialize calendar
+        updateMonthYear();
+        generateCalendarDays(currentMonth, currentYear);
+    </script>
+</body>
+</html>
