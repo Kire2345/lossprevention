@@ -21,12 +21,12 @@
             grid-template-columns: repeat(7, 1fr);
             gap: 10px;
             background-color: #b0b0b0;
-            padding: 20px;
+            padding: 10px;
             border-radius: 10px;
         }
         .day, .header {
             border: 1px solid #ccc;
-            padding: 10px;  /* Reduced padding */
+            padding: 5px;  /* Reduced padding */
             text-align: center;
             background-color: #fff;
             border-radius: 5px;
@@ -57,8 +57,6 @@
             font-size: 16px;
         }
     </style>
-    <!-- Include CatMeow CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/catmeow/dist/catmeow.min.css">
 </head>
 <body>
     <div class="container">
@@ -91,8 +89,6 @@
             </form>
         </div>
     </div>
-    <!-- Include CatMeow JS -->
-    <script src="https://unpkg.com/catmeow/dist/catmeow.min.js"></script>
     <script>
         const calendar = document.getElementById('calendar');
         const dayOffForm = document.getElementById('dayOffForm');
@@ -106,12 +102,6 @@
 
         // Days of the week
         const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
-        const monthBackgrounds = [
-            'url(cat_january.jpg)', 'url(cat_february.jpg)', 'url(cat_march.jpg)', 'url(cat_april.jpg)', 
-            'url(cat_may.jpg)', 'url(cat_june.jpg)', 'url(cat_july.jpg)', 'url(cat_august.jpg)', 
-            'url(cat_september.jpg)', 'url(cat_october.jpg)', 'url(cat_november.jpg)', 'url(cat_december.jpg)'
-        ];
 
         // Generate calendar headers
         function generateCalendarHeaders() {
@@ -241,9 +231,6 @@
         // Initialize calendar
         updateMonthYear();
         generateCalendarDays(currentMonth, currentYear);
-
-        // Initialize CatMeow
-        new CatMeow();
     </script>
 </body>
 </html>
